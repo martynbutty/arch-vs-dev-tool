@@ -46,9 +46,9 @@ This document keeps track of the tasks and their current status for building the
 - [X] Create functions to display the score breakdown.
 
 ### Prompt 6: Score Breakdown Display
-- [ ] Implement the score breakdown display in the UI.
-- [ ] Allow users to edit responses and re-score.
+- [X] Implement the score breakdown display in the UI.
+- [X] Allow users to edit responses and re-score.
 
 ### Prompt 7: Export to Markdown
-- [ ] Implement the export to Markdown feature.
-- [ ] Ensure the exported file includes the final score and breakdown.
+- [X] Implement the export to Markdown feature.
+- [X] Ensure the exported file includes the final score and breakdown.
