@@ -42,8 +42,8 @@ This document keeps track of the tasks and their current status for building the
 - [X] Create functions to handle user responses.
 
 ### Prompt 5: Implement Scoring Logic
-- [ ] Implement the logic to calculate scores (A–D) based on user responses.
-- [ ] Create functions to display the score breakdown.
+- [X] Implement the logic to calculate scores (A–D) based on user responses.
+- [X] Create functions to display the score breakdown.
 
 ### Prompt 6: Score Breakdown Display
 - [ ] Implement the score breakdown display in the UI.

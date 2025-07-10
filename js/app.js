@@ -197,17 +197,20 @@ function setupEventListeners() {
     const exportBtn = document.getElementById('export-btn');
     const restartBtn = document.getElementById('restart-btn');
     
-    if (editBtn) {
+if (editBtn) {
         editBtn.addEventListener('click', function() {
             console.log('Edit responses');
-            // This will be implemented in later prompts
+            currentQuestion = 0;
+            showScreen('question-screen');
+            loadQuestion(currentQuestion);
         });
     }
     
-    if (exportBtn) {
+if (exportBtn) {
         exportBtn.addEventListener('click', function() {
             console.log('Export to Markdown');
-            // This will be implemented in later prompts
+            const results = calculateScore(responses);
+            exportToMarkdown(results);
         });
     }
     
@@ -546,10 +549,37 @@ function displayScoreBreakdown(breakdown) {
     console.log('Score breakdown displayed successfully');
 }
 
-// Export functionality placeholder
 function exportToMarkdown(results) {
-    // This will be implemented in later prompts
-    console.log('Exporting to Markdown:', results);
+    if (!results) {
+        console.error('No results to export');
+        return;
+    }
+    
+    const { finalScore, numericScore, averageScore, totalScore, breakdown, interpretation } = results;
+    
+    let markdownContent = `# Assessment Results\n`;
+    markdownContent += `\n**Final Recommendation:** ${finalScore}\n`;
+    markdownContent += `\n**Score Interpretation:**\n\n${interpretation}\n`;
+    markdownContent += `\n**Total Score:** ${totalScore}\n`;
+    markdownContent += `\n**Average Score:** ${averageScore.toFixed(2)}\n`;
+    markdownContent += `\n## Category Breakdown\n`;
+    
+    breakdown.forEach(category => {
+        markdownContent += `\n### ${category.category}\n`;
+        markdownContent += `- **Score:** ${category.score} (${category.numericScore})\n`;
+        markdownContent += `- **Description:** ${category.label}\n`;
+        markdownContent += `- **Details:** ${category.description}\n`;
+    });
+    
+    const blob = new Blob([markdownContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'assessment-results.md';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    console.log('Exported to Markdown successfully');
 }
 
 console.log('Application code loaded successfully');
