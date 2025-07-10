@@ -38,8 +38,8 @@ This document keeps track of the tasks and their current status for building the
 - [X] Implement the basic HTML structure.
 
 ### Prompt 4: Define Questions
-- [ ] Define the four structured questions in JavaScript.
-- [ ] Create functions to handle user responses.
+- [X] Define the four structured questions in JavaScript.
+- [X] Create functions to handle user responses.
 
 ### Prompt 5: Implement Scoring Logic
 - [ ] Implement the logic to calculate scores (A–D) based on user responses.

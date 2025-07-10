@@ -414,13 +414,136 @@ function updateNavigationButtons() {
 }
 
 function calculateScore(responses) {
-    // This will be implemented in later prompts
     console.log('Calculating score from responses:', responses);
+    
+    if (!responses || responses.length !== 4) {
+        console.error('Invalid responses for scoring:', responses);
+        return null;
+    }
+    
+    // Calculate total score (sum of all response scores)
+    const totalScore = responses.reduce((sum, response) => sum + response.score, 0);
+    
+    // Calculate average score
+    const averageScore = totalScore / responses.length;
+    
+    // Round to nearest whole number
+    const roundedScore = Math.round(averageScore);
+    
+    // Map back to A-D
+    const scoreMap = {
+        1: 'A',
+        2: 'B', 
+        3: 'C',
+        4: 'D'
+    };
+    
+    const finalScore = scoreMap[roundedScore] || 'C';
+    
+    // Create detailed breakdown
+    const breakdown = responses.map(response => ({
+        category: response.questionTitle,
+        score: response.value,
+        numericScore: response.score,
+        label: response.label,
+        description: response.description
+    }));
+    
+    const results = {
+        finalScore: finalScore,
+        numericScore: roundedScore,
+        averageScore: averageScore,
+        totalScore: totalScore,
+        breakdown: breakdown,
+        interpretation: getScoreInterpretation(finalScore)
+    };
+    
+    console.log('Calculated results:', results);
+    return results;
 }
 
-function displayResults(score, breakdown) {
-    // This will be implemented in later prompts
-    console.log('Displaying results:', score, breakdown);
+function getScoreInterpretation(score) {
+    const interpretations = {
+        'A': 'Strong architectural decision - This should be made at the architectural level with careful consideration of system-wide impacts.',
+        'B': 'Likely architectural decision - This probably belongs at the architectural level, but may have some flexibility.',
+        'C': 'Likely development team decision - This can probably be deferred to the development team with some architectural guidance.',
+        'D': 'Strong development team decision - This should be deferred to the development team with minimal architectural oversight.'
+    };
+    
+    return interpretations[score] || 'Unable to determine recommendation.';
+}
+
+function displayResults(finalScore, breakdown) {
+    console.log('Displaying results:', finalScore, breakdown);
+    
+    // Update final score display
+    const finalScoreElement = document.getElementById('final-score');
+    const scoreMeaningElement = document.getElementById('score-meaning');
+    
+    if (finalScoreElement) {
+        finalScoreElement.textContent = finalScore;
+        
+        // Update score color based on result
+        const scoreContainer = finalScoreElement.closest('.final-score');
+        if (scoreContainer) {
+            // Remove any existing score classes
+            scoreContainer.classList.remove('score-a', 'score-b', 'score-c', 'score-d');
+            // Add new score class
+            scoreContainer.classList.add(`score-${finalScore.toLowerCase()}`);
+        }
+    }
+    
+    if (scoreMeaningElement) {
+        scoreMeaningElement.textContent = getScoreInterpretation(finalScore);
+    }
+    
+    // Display category breakdown
+    displayScoreBreakdown(breakdown);
+}
+
+function displayScoreBreakdown(breakdown) {
+    const breakdownContainer = document.getElementById('score-breakdown');
+    
+    if (!breakdownContainer) {
+        console.error('Score breakdown container not found');
+        return;
+    }
+    
+    // Clear existing content
+    breakdownContainer.innerHTML = '';
+    
+    breakdown.forEach(category => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category-breakdown';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'category-header';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'category-name';
+        nameSpan.textContent = category.category;
+        
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'category-score';
+        scoreSpan.textContent = category.score;
+        
+        // Add score-specific styling
+        scoreSpan.classList.add(`score-${category.score.toLowerCase()}`);
+        
+        headerDiv.appendChild(nameSpan);
+        headerDiv.appendChild(scoreSpan);
+        
+        const descriptionDiv = document.createElement('div');
+        descriptionDiv.className = 'category-description';
+        descriptionDiv.innerHTML = `<strong>${category.label}:</strong> ${category.description}`;
+        
+        categoryDiv.appendChild(headerDiv);
+        categoryDiv.appendChild(descriptionDiv);
+        
+        breakdownContainer.appendChild(categoryDiv);
+    });
+    
+    console.log('Score breakdown displayed successfully');
 }
 
 // Export functionality placeholder
