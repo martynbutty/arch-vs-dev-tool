@@ -34,8 +34,8 @@ This document keeps track of the tasks and their current status for building the
 - [X] Set up a basic index.html file.
 
 ### Prompt 3: Design UI Layout
-- [ ] Create wireframes for the main screen and question screens.
-- [ ] Implement the basic HTML structure.
+- [X] Create wireframes for the main screen and question screens.
+- [X] Implement the basic HTML structure.
 
 ### Prompt 4: Define Questions
 - [ ] Define the four structured questions in JavaScript.

@@ -6,6 +6,134 @@ let currentScreen = 'main-screen';
 let currentQuestion = 0;
 let responses = [];
 
+// Question Data
+const questions = [
+    {
+        id: 'structural',
+        title: 'Structural vs. Code',
+        question: 'Does this decision affect the structure of the system (e.g. components, deployment units, communication patterns), or is it limited to how source code is written or organized?',
+        options: [
+            {
+                value: 'A',
+                score: 1,
+                label: 'Significant structural changes',
+                description: 'Major architectural changes like new architectural style, major component reorganization'
+            },
+            {
+                value: 'B',
+                score: 2,
+                label: 'Some structural changes',
+                description: 'New deployment units, added communication paths'
+            },
+            {
+                value: 'C',
+                score: 3,
+                label: 'Mostly code movement',
+                description: 'Code reorganization or refactoring'
+            },
+            {
+                value: 'D',
+                score: 4,
+                label: 'Simple refactoring',
+                description: 'New functions or simple code changes'
+            }
+        ]
+    },
+    {
+        id: 'strategic',
+        title: 'Strategic vs. Tactical',
+        question: 'How many people need to be involved in making this decision, and how long will it take to reach consensus?',
+        options: [
+            {
+                value: 'A',
+                score: 1,
+                label: 'Many people, weeks/months',
+                description: 'Many stakeholders involved, decision takes weeks or months'
+            },
+            {
+                value: 'B',
+                score: 2,
+                label: '3+ people, couple weeks',
+                description: '3 or more people involved, takes at least a couple of weeks'
+            },
+            {
+                value: 'C',
+                score: 3,
+                label: 'Few people, within two weeks',
+                description: 'Few people involved, decision within two weeks'
+            },
+            {
+                value: 'D',
+                score: 4,
+                label: '1-2 people, few days',
+                description: '1-2 people can decide in a few days'
+            }
+        ]
+    },
+    {
+        id: 'effort',
+        title: 'Implementation Effort',
+        question: 'What is the estimated level of effort required to implement this decision?',
+        options: [
+            {
+                value: 'A',
+                score: 1,
+                label: 'High effort',
+                description: 'Breaking up monolith, separating data stores, major system changes'
+            },
+            {
+                value: 'B',
+                score: 2,
+                label: 'Significant effort',
+                description: 'Creating new deployment units, substantial development work'
+            },
+            {
+                value: 'C',
+                score: 3,
+                label: 'Moderate effort',
+                description: 'Moving lots of source code, medium-sized changes'
+            },
+            {
+                value: 'D',
+                score: 4,
+                label: 'Simple changes',
+                description: 'Minor modifications, quick implementation'
+            }
+        ]
+    },
+    {
+        id: 'tradeoffs',
+        title: 'Architectural Trade-offs',
+        question: 'Does this decision involve significant trade-offs that could impact scalability, performance, cost, or maintainability?',
+        options: [
+            {
+                value: 'A',
+                score: 1,
+                label: 'Major trade-offs',
+                description: 'Significant impact on performance, data integrity, distributed transactions, but gains in agility/extensibility'
+            },
+            {
+                value: 'B',
+                score: 2,
+                label: 'Notable trade-offs',
+                description: 'Some of the above trade-offs, but less severe'
+            },
+            {
+                value: 'C',
+                score: 3,
+                label: 'Minor trade-offs',
+                description: 'Small but noticeable trade-offs'
+            },
+            {
+                value: 'D',
+                score: 4,
+                label: 'No significant trade-offs',
+                description: 'No major architectural implications'
+            }
+        ]
+    }
+];
+
 // Screen Management
 function showScreen(screenId) {
     // Hide all screens
@@ -42,8 +170,7 @@ function setupEventListeners() {
     if (startBtn) {
         startBtn.addEventListener('click', function() {
             console.log('Starting assessment...');
-            // This will be implemented in the next prompt
-            alert('Assessment functionality will be implemented in the next step!');
+            startAssessment();
         });
     }
     
@@ -54,14 +181,14 @@ function setupEventListeners() {
     if (prevBtn) {
         prevBtn.addEventListener('click', function() {
             console.log('Previous question');
-            // This will be implemented in the next prompt
+            previousQuestion();
         });
     }
     
     if (nextBtn) {
         nextBtn.addEventListener('click', function() {
             console.log('Next question');
-            // This will be implemented in the next prompt
+            nextQuestion();
         });
     }
     
@@ -106,10 +233,184 @@ function updateProgress(questionIndex, totalQuestions) {
     }
 }
 
-// Placeholder functions for future implementation
+// Assessment Functions
+function startAssessment() {
+    currentQuestion = 0;
+    responses = [];
+    showScreen('question-screen');
+    loadQuestion(0);
+}
+
 function loadQuestion(questionIndex) {
-    // This will be implemented in the next prompt
-    console.log(`Loading question ${questionIndex}`);
+    if (questionIndex < 0 || questionIndex >= questions.length) {
+        console.error('Invalid question index:', questionIndex);
+        return;
+    }
+    
+    const question = questions[questionIndex];
+    
+    // Update question content
+    document.getElementById('question-title').textContent = question.title;
+    document.getElementById('question-text').textContent = question.question;
+    
+    // Update progress
+    updateProgress(questionIndex, questions.length);
+    
+    // Generate answer options
+    const answerContainer = document.getElementById('answer-options');
+    answerContainer.innerHTML = '';
+    
+    question.options.forEach((option, index) => {
+        const optionElement = createAnswerOption(question.id, option, index);
+        answerContainer.appendChild(optionElement);
+    });
+    
+    // Update navigation buttons
+    updateNavigationButtons();
+    
+    // Restore previous selection if exists
+    const previousResponse = responses[questionIndex];
+    if (previousResponse) {
+        const radioInput = document.querySelector(`input[name="${question.id}"][value="${previousResponse.value}"]`);
+        if (radioInput) {
+            radioInput.checked = true;
+            radioInput.closest('.answer-option').classList.add('selected');
+        }
+    }
+    
+    console.log(`Loaded question ${questionIndex + 1}: ${question.title}`);
+}
+
+function createAnswerOption(questionId, option, index) {
+    const optionDiv = document.createElement('div');
+    optionDiv.className = 'answer-option';
+    
+    const radioInput = document.createElement('input');
+    radioInput.type = 'radio';
+    radioInput.id = `${questionId}_${index}`;
+    radioInput.name = questionId;
+    radioInput.value = option.value;
+    
+    const answerContent = document.createElement('div');
+    answerContent.className = 'answer-content';
+    
+    const answerLabel = document.createElement('div');
+    answerLabel.className = 'answer-label';
+    answerLabel.textContent = `${option.value}. ${option.label}`;
+    
+    const answerDescription = document.createElement('div');
+    answerDescription.className = 'answer-description';
+    answerDescription.textContent = option.description;
+    
+    answerContent.appendChild(answerLabel);
+    answerContent.appendChild(answerDescription);
+    
+    optionDiv.appendChild(radioInput);
+    optionDiv.appendChild(answerContent);
+    
+    // Add click handlers
+    optionDiv.addEventListener('click', function() {
+        handleResponse(questionId, option);
+    });
+    
+    radioInput.addEventListener('change', function() {
+        if (this.checked) {
+            handleResponse(questionId, option);
+        }
+    });
+    
+    return optionDiv;
+}
+
+function handleResponse(questionId, selectedOption) {
+    console.log(`Response for ${questionId}:`, selectedOption);
+    
+    // Clear previous selections
+    document.querySelectorAll('.answer-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Mark current selection
+    const selectedRadio = document.querySelector(`input[name="${questionId}"][value="${selectedOption.value}"]`);
+    if (selectedRadio) {
+        selectedRadio.checked = true;
+        selectedRadio.closest('.answer-option').classList.add('selected');
+    }
+    
+    // Store response
+    responses[currentQuestion] = {
+        questionId: questionId,
+        questionTitle: questions[currentQuestion].title,
+        value: selectedOption.value,
+        score: selectedOption.score,
+        label: selectedOption.label,
+        description: selectedOption.description
+    };
+    
+    // Enable next button
+    updateNavigationButtons();
+    
+    console.log('Current responses:', responses);
+}
+
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        loadQuestion(currentQuestion);
+    }
+}
+
+function nextQuestion() {
+    // Check if current question is answered
+    if (!responses[currentQuestion]) {
+        alert('Please select an answer before proceeding.');
+        return;
+    }
+    
+    if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion(currentQuestion);
+    } else {
+        // All questions answered, show results
+        completeAssessment();
+    }
+}
+
+function completeAssessment() {
+    console.log('Assessment completed with responses:', responses);
+    
+    // Show loading screen briefly
+    showScreen('loading-screen');
+    
+    // Calculate score after a short delay for UX
+    setTimeout(() => {
+        const results = calculateScore(responses);
+        displayResults(results.finalScore, results.breakdown);
+        showScreen('results-screen');
+    }, 1500);
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    // Previous button
+    if (prevBtn) {
+        prevBtn.disabled = (currentQuestion === 0);
+    }
+    
+    // Next button
+    if (nextBtn) {
+        const hasResponse = responses[currentQuestion] !== undefined;
+        nextBtn.disabled = !hasResponse;
+        
+        // Update button text for last question
+        if (currentQuestion === questions.length - 1) {
+            nextBtn.textContent = 'Complete Assessment';
+        } else {
+            nextBtn.textContent = 'Next';
+        }
+    }
 }
 
 function calculateScore(responses) {
