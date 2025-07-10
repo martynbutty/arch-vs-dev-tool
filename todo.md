@@ -30,8 +30,8 @@ This document keeps track of the tasks and their current status for building the
 - [ ] Initialize a Git repository.
 
 ### Prompt 2: Set Up Project Structure
-- [ ] Create folders for HTML, CSS, and JavaScript files.
-- [ ] Set up a basic index.html file.
+- [X] Create folders for HTML, CSS, and JavaScript files.
+- [X] Set up a basic index.html file.
 
 ### Prompt 3: Design UI Layout
 - [ ] Create wireframes for the main screen and question screens.
