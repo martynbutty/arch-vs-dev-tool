@@ -55,12 +55,40 @@
         <div id="results-screen" class="screen">
             <div class="results-header">
                 <h1>Assessment Results</h1>
-                <div class="final-score">
-                    <span class="score-label">Final Recommendation:</span>
-                    <span id="final-score" class="score-value">-</span>
+                
+                <!-- Decision Scale -->
+                <div class="decision-scale">
+                    <div class="scale-labels">
+                        <div class="scale-label left">
+                            <span class="label-text">Architecture</span>
+                            <span class="label-subtext">Centralized Decision</span>
+                        </div>
+                        <div class="scale-label right">
+                            <span class="label-text">Development</span>
+                            <span class="label-subtext">Team Decision</span>
+                        </div>
+                    </div>
+                    
+                    <div class="scale-track">
+                        <div class="scale-markers">
+                            <div class="marker" data-score="A">A</div>
+                            <div class="marker" data-score="B">B</div>
+                            <div class="marker" data-score="C">C</div>
+                            <div class="marker" data-score="D">D</div>
+                        </div>
+                        <div class="scale-indicator" id="scale-indicator"></div>
+                    </div>
                 </div>
-                <div class="score-interpretation">
-                    <p id="score-meaning">Score interpretation will appear here</p>
+                
+                <!-- Score Information -->
+                <div class="score-info">
+                    <div class="final-score-display">
+                        <span class="score-label">Final Recommendation:</span>
+                        <span id="final-score" class="score-value">-</span>
+                    </div>
+                    <div class="score-interpretation">
+                        <p id="score-meaning">Score interpretation will appear here</p>
+                    </div>
                 </div>
             </div>
             

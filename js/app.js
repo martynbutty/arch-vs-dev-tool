@@ -485,23 +485,46 @@ function displayResults(finalScore, breakdown) {
     
     if (finalScoreElement) {
         finalScoreElement.textContent = finalScore;
-        
-        // Update score color based on result
-        const scoreContainer = finalScoreElement.closest('.final-score');
-        if (scoreContainer) {
-            // Remove any existing score classes
-            scoreContainer.classList.remove('score-a', 'score-b', 'score-c', 'score-d');
-            // Add new score class
-            scoreContainer.classList.add(`score-${finalScore.toLowerCase()}`);
-        }
     }
     
     if (scoreMeaningElement) {
         scoreMeaningElement.textContent = getScoreInterpretation(finalScore);
     }
     
+    // Update scale indicator position
+    updateScaleIndicator(finalScore);
+    
     // Display category breakdown
     displayScoreBreakdown(breakdown);
+}
+
+function updateScaleIndicator(finalScore) {
+    const indicator = document.getElementById('scale-indicator');
+    if (!indicator) return;
+    
+    // Calculate position based on score (A=0%, B=33%, C=66%, D=100%)
+    const positions = {
+        'A': 12.5,   // Slightly offset from left edge
+        'B': 37.5,   // Between A and center
+        'C': 62.5,   // Between center and D
+        'D': 87.5    // Slightly offset from right edge
+    };
+    
+    const position = positions[finalScore] || 50;
+    indicator.style.left = `${position}%`;
+    
+    // Update indicator color based on score
+    indicator.style.backgroundColor = getScoreColor(finalScore);
+}
+
+function getScoreColor(score) {
+    const colors = {
+        'A': '#2c3e50',  // Dark blue for strong architectural
+        'B': '#3498db',  // Blue for likely architectural
+        'C': '#5dade2',  // Light blue for likely development
+        'D': '#27ae60'   // Green for strong development
+    };
+    return colors[score] || '#3498db';
 }
 
 function displayScoreBreakdown(breakdown) {
