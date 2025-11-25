@@ -5,6 +5,8 @@ console.log('Architecture Decision Helper loaded');
 let currentScreen = 'main-screen';
 let currentQuestion = 0;
 let responses = [];
+let assessmentTitle = '';
+let assessmentDescription = '';
 
 // Question Data
 const questions = [
@@ -140,7 +142,7 @@ function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
-    
+
     // Show the target screen
     const targetScreen = document.getElementById(screenId);
     if (targetScreen) {
@@ -151,15 +153,15 @@ function showScreen(screenId) {
 }
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM loaded, initializing app...');
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     // Show the main screen
     showScreen('main-screen');
-    
+
     console.log('Application initialized successfully');
 });
 
@@ -168,58 +170,66 @@ function setupEventListeners() {
     // Start Assessment button
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
-        startBtn.addEventListener('click', function() {
+        startBtn.addEventListener('click', function () {
             console.log('Starting assessment...');
             startAssessment();
         });
     }
-    
+
     // Navigation buttons
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    
+
     if (prevBtn) {
-        prevBtn.addEventListener('click', function() {
+        prevBtn.addEventListener('click', function () {
             console.log('Previous question');
             previousQuestion();
         });
     }
-    
+
     if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
+        nextBtn.addEventListener('click', function () {
             console.log('Next question');
             nextQuestion();
         });
     }
-    
+
     // Results screen buttons
     const editBtn = document.getElementById('edit-responses-btn');
     const exportBtn = document.getElementById('export-btn');
     const restartBtn = document.getElementById('restart-btn');
-    
-if (editBtn) {
-        editBtn.addEventListener('click', function() {
+
+    if (editBtn) {
+        editBtn.addEventListener('click', function () {
             console.log('Edit responses');
             currentQuestion = 0;
             showScreen('question-screen');
             loadQuestion(currentQuestion);
         });
     }
-    
-if (exportBtn) {
-        exportBtn.addEventListener('click', function() {
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function () {
             console.log('Export to Markdown');
             const results = calculateScore(responses);
             exportToMarkdown(results);
         });
     }
-    
+
     if (restartBtn) {
-        restartBtn.addEventListener('click', function() {
+        restartBtn.addEventListener('click', function () {
             console.log('Restart assessment');
             showScreen('main-screen');
             currentQuestion = 0;
             responses = [];
+            assessmentTitle = '';
+            assessmentDescription = '';
+
+            // Clear input fields
+            const titleInput = document.getElementById('assessment-title');
+            const descriptionInput = document.getElementById('assessment-description');
+            if (titleInput) titleInput.value = '';
+            if (descriptionInput) descriptionInput.value = '';
         });
     }
 }
@@ -228,7 +238,7 @@ if (exportBtn) {
 function updateProgress(questionIndex, totalQuestions) {
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
-    
+
     if (progressFill && progressText) {
         const percentage = ((questionIndex + 1) / totalQuestions) * 100;
         progressFill.style.width = percentage + '%';
@@ -238,6 +248,13 @@ function updateProgress(questionIndex, totalQuestions) {
 
 // Assessment Functions
 function startAssessment() {
+    // Capture title and description
+    const titleInput = document.getElementById('assessment-title');
+    const descriptionInput = document.getElementById('assessment-description');
+
+    assessmentTitle = titleInput ? titleInput.value.trim() : '';
+    assessmentDescription = descriptionInput ? descriptionInput.value.trim() : '';
+
     currentQuestion = 0;
     responses = [];
     showScreen('question-screen');
@@ -249,28 +266,28 @@ function loadQuestion(questionIndex) {
         console.error('Invalid question index:', questionIndex);
         return;
     }
-    
+
     const question = questions[questionIndex];
-    
+
     // Update question content
     document.getElementById('question-title').textContent = question.title;
     document.getElementById('question-text').textContent = question.question;
-    
+
     // Update progress
     updateProgress(questionIndex, questions.length);
-    
+
     // Generate answer options
     const answerContainer = document.getElementById('answer-options');
     answerContainer.innerHTML = '';
-    
+
     question.options.forEach((option, index) => {
         const optionElement = createAnswerOption(question.id, option, index);
         answerContainer.appendChild(optionElement);
     });
-    
+
     // Update navigation buttons
     updateNavigationButtons();
-    
+
     // Restore previous selection if exists
     const previousResponse = responses[questionIndex];
     if (previousResponse) {
@@ -280,66 +297,66 @@ function loadQuestion(questionIndex) {
             radioInput.closest('.answer-option').classList.add('selected');
         }
     }
-    
+
     console.log(`Loaded question ${questionIndex + 1}: ${question.title}`);
 }
 
 function createAnswerOption(questionId, option, index) {
     const optionDiv = document.createElement('div');
     optionDiv.className = 'answer-option';
-    
+
     const radioInput = document.createElement('input');
     radioInput.type = 'radio';
     radioInput.id = `${questionId}_${index}`;
     radioInput.name = questionId;
     radioInput.value = option.value;
-    
+
     const answerContent = document.createElement('div');
     answerContent.className = 'answer-content';
-    
+
     const answerLabel = document.createElement('div');
     answerLabel.className = 'answer-label';
     answerLabel.textContent = `${option.value}. ${option.label}`;
-    
+
     const answerDescription = document.createElement('div');
     answerDescription.className = 'answer-description';
     answerDescription.textContent = option.description;
-    
+
     answerContent.appendChild(answerLabel);
     answerContent.appendChild(answerDescription);
-    
+
     optionDiv.appendChild(radioInput);
     optionDiv.appendChild(answerContent);
-    
+
     // Add click handlers
-    optionDiv.addEventListener('click', function() {
+    optionDiv.addEventListener('click', function () {
         handleResponse(questionId, option);
     });
-    
-    radioInput.addEventListener('change', function() {
+
+    radioInput.addEventListener('change', function () {
         if (this.checked) {
             handleResponse(questionId, option);
         }
     });
-    
+
     return optionDiv;
 }
 
 function handleResponse(questionId, selectedOption) {
     console.log(`Response for ${questionId}:`, selectedOption);
-    
+
     // Clear previous selections
     document.querySelectorAll('.answer-option').forEach(option => {
         option.classList.remove('selected');
     });
-    
+
     // Mark current selection
     const selectedRadio = document.querySelector(`input[name="${questionId}"][value="${selectedOption.value}"]`);
     if (selectedRadio) {
         selectedRadio.checked = true;
         selectedRadio.closest('.answer-option').classList.add('selected');
     }
-    
+
     // Store response
     responses[currentQuestion] = {
         questionId: questionId,
@@ -349,10 +366,10 @@ function handleResponse(questionId, selectedOption) {
         label: selectedOption.label,
         description: selectedOption.description
     };
-    
+
     // Enable next button
     updateNavigationButtons();
-    
+
     console.log('Current responses:', responses);
 }
 
@@ -369,7 +386,7 @@ function nextQuestion() {
         alert('Please select an answer before proceeding.');
         return;
     }
-    
+
     if (currentQuestion < questions.length - 1) {
         currentQuestion++;
         loadQuestion(currentQuestion);
@@ -381,10 +398,10 @@ function nextQuestion() {
 
 function completeAssessment() {
     console.log('Assessment completed with responses:', responses);
-    
+
     // Show loading screen briefly
     showScreen('loading-screen');
-    
+
     // Calculate score after a short delay for UX
     setTimeout(() => {
         const results = calculateScore(responses);
@@ -396,17 +413,17 @@ function completeAssessment() {
 function updateNavigationButtons() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    
+
     // Previous button
     if (prevBtn) {
         prevBtn.disabled = (currentQuestion === 0);
     }
-    
+
     // Next button
     if (nextBtn) {
         const hasResponse = responses[currentQuestion] !== undefined;
         nextBtn.disabled = !hasResponse;
-        
+
         // Update button text for last question
         if (currentQuestion === questions.length - 1) {
             nextBtn.textContent = 'Complete Assessment';
@@ -418,31 +435,31 @@ function updateNavigationButtons() {
 
 function calculateScore(responses) {
     console.log('Calculating score from responses:', responses);
-    
+
     if (!responses || responses.length !== 4) {
         console.error('Invalid responses for scoring:', responses);
         return null;
     }
-    
+
     // Calculate total score (sum of all response scores)
     const totalScore = responses.reduce((sum, response) => sum + response.score, 0);
-    
+
     // Calculate average score
     const averageScore = totalScore / responses.length;
-    
+
     // Round to nearest whole number
     const roundedScore = Math.round(averageScore);
-    
+
     // Map back to A-D
     const scoreMap = {
         1: 'A',
-        2: 'B', 
+        2: 'B',
         3: 'C',
         4: 'D'
     };
-    
+
     const finalScore = scoreMap[roundedScore] || 'C';
-    
+
     // Create detailed breakdown
     const breakdown = responses.map(response => ({
         category: response.questionTitle,
@@ -451,7 +468,7 @@ function calculateScore(responses) {
         label: response.label,
         description: response.description
     }));
-    
+
     const results = {
         finalScore: finalScore,
         numericScore: roundedScore,
@@ -460,7 +477,7 @@ function calculateScore(responses) {
         breakdown: breakdown,
         interpretation: getScoreInterpretation(finalScore)
     };
-    
+
     console.log('Calculated results:', results);
     return results;
 }
@@ -472,36 +489,61 @@ function getScoreInterpretation(score) {
         'C': 'Likely development team decision - This can probably be deferred to the development team with some architectural guidance.',
         'D': 'Strong development team decision - This should be deferred to the development team with minimal architectural oversight.'
     };
-    
+
     return interpretations[score] || 'Unable to determine recommendation.';
 }
 
 function displayResults(finalScore, breakdown) {
     console.log('Displaying results:', finalScore, breakdown);
-    
+
+    // Display assessment context if provided
+    displayAssessmentContext();
+
     // Update final score display
     const finalScoreElement = document.getElementById('final-score');
     const scoreMeaningElement = document.getElementById('score-meaning');
-    
+
     if (finalScoreElement) {
         finalScoreElement.textContent = finalScore;
     }
-    
+
     if (scoreMeaningElement) {
         scoreMeaningElement.textContent = getScoreInterpretation(finalScore);
     }
-    
+
     // Update scale indicator position
     updateScaleIndicator(finalScore);
-    
+
     // Display category breakdown
     displayScoreBreakdown(breakdown);
+}
+
+function displayAssessmentContext() {
+    const contextContainer = document.getElementById('assessment-context');
+    const titleElement = document.getElementById('context-title');
+    const descriptionElement = document.getElementById('context-description');
+
+    if (assessmentTitle || assessmentDescription) {
+        if (titleElement && assessmentTitle) {
+            titleElement.textContent = assessmentTitle;
+        }
+        if (descriptionElement && assessmentDescription) {
+            descriptionElement.textContent = assessmentDescription;
+        }
+        if (contextContainer) {
+            contextContainer.style.display = 'block';
+        }
+    } else {
+        if (contextContainer) {
+            contextContainer.style.display = 'none';
+        }
+    }
 }
 
 function updateScaleIndicator(finalScore) {
     const indicator = document.getElementById('scale-indicator');
     if (!indicator) return;
-    
+
     // Calculate position based on score (A=0%, B=33%, C=66%, D=100%)
     const positions = {
         'A': 12.5,   // Slightly offset from left edge
@@ -509,10 +551,10 @@ function updateScaleIndicator(finalScore) {
         'C': 62.5,   // Between center and D
         'D': 87.5    // Slightly offset from right edge
     };
-    
+
     const position = positions[finalScore] || 50;
     indicator.style.left = `${position}%`;
-    
+
     // Update indicator color based on score
     indicator.style.backgroundColor = getScoreColor(finalScore);
 }
@@ -529,46 +571,46 @@ function getScoreColor(score) {
 
 function displayScoreBreakdown(breakdown) {
     const breakdownContainer = document.getElementById('score-breakdown');
-    
+
     if (!breakdownContainer) {
         console.error('Score breakdown container not found');
         return;
     }
-    
+
     // Clear existing content
     breakdownContainer.innerHTML = '';
-    
+
     breakdown.forEach(category => {
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'category-breakdown';
-        
+
         const headerDiv = document.createElement('div');
         headerDiv.className = 'category-header';
-        
+
         const nameSpan = document.createElement('span');
         nameSpan.className = 'category-name';
         nameSpan.textContent = category.category;
-        
+
         const scoreSpan = document.createElement('span');
         scoreSpan.className = 'category-score';
         scoreSpan.textContent = category.score;
-        
+
         // Add score-specific styling
         scoreSpan.classList.add(`score-${category.score.toLowerCase()}`);
-        
+
         headerDiv.appendChild(nameSpan);
         headerDiv.appendChild(scoreSpan);
-        
+
         const descriptionDiv = document.createElement('div');
         descriptionDiv.className = 'category-description';
         descriptionDiv.innerHTML = `<strong>${category.label}:</strong> ${category.description}`;
-        
+
         categoryDiv.appendChild(headerDiv);
         categoryDiv.appendChild(descriptionDiv);
-        
+
         breakdownContainer.appendChild(categoryDiv);
     });
-    
+
     console.log('Score breakdown displayed successfully');
 }
 
@@ -577,23 +619,33 @@ function exportToMarkdown(results) {
         console.error('No results to export');
         return;
     }
-    
-    const { finalScore, numericScore, averageScore, totalScore, breakdown, interpretation } = results;
-    
+
+    const { finalScore, averageScore, totalScore, breakdown, interpretation } = results;
+
     let markdownContent = `# Assessment Results\n`;
+
+    // Add title and description if provided
+    if (assessmentTitle) {
+        markdownContent += `\n## ${assessmentTitle}\n`;
+    }
+
+    if (assessmentDescription) {
+        markdownContent += `\n**Description:** ${assessmentDescription}\n`;
+    }
+
     markdownContent += `\n**Final Recommendation:** ${finalScore}\n`;
     markdownContent += `\n**Score Interpretation:**\n\n${interpretation}\n`;
     markdownContent += `\n**Total Score:** ${totalScore}\n`;
     markdownContent += `\n**Average Score:** ${averageScore.toFixed(2)}\n`;
     markdownContent += `\n## Category Breakdown\n`;
-    
+
     breakdown.forEach(category => {
         markdownContent += `\n### ${category.category}\n`;
         markdownContent += `- **Score:** ${category.score} (${category.numericScore})\n`;
         markdownContent += `- **Description:** ${category.label}\n`;
         markdownContent += `- **Details:** ${category.description}\n`;
     });
-    
+
     const blob = new Blob([markdownContent], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -601,7 +653,7 @@ function exportToMarkdown(results) {
     a.download = 'assessment-results.md';
     a.click();
     URL.revokeObjectURL(url);
-    
+
     console.log('Exported to Markdown successfully');
 }
 

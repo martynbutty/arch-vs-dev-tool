@@ -24,6 +24,17 @@
                     <li>Export results as a Markdown file</li>
                 </ol>
             </div>
+            <div class="assessment-details">
+                <h2>Assessment Details (Optional)</h2>
+                <div class="input-group">
+                    <label for="assessment-title">Assessment Title:</label>
+                    <input type="text" id="assessment-title" placeholder="e.g., Database Migration Strategy" maxlength="100">
+                </div>
+                <div class="input-group">
+                    <label for="assessment-description">Description:</label>
+                    <textarea id="assessment-description" placeholder="Brief description of the decision being evaluated..." rows="3" maxlength="500"></textarea>
+                </div>
+            </div>
             <div class="action-section">
                 <button id="start-btn" class="primary-btn">Start Assessment</button>
             </div>
@@ -55,6 +66,10 @@
         <div id="results-screen" class="screen">
             <div class="results-header">
                 <h1>Assessment Results</h1>
+                <div id="assessment-context" class="assessment-context" style="display: none;">
+                    <h3 id="context-title"></h3>
+                    <p id="context-description"></p>
+                </div>
                 
                 <!-- Decision Scale -->
                 <div class="decision-scale">
