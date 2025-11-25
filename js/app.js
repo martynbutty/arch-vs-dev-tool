@@ -493,6 +493,17 @@ function getScoreInterpretation(score) {
     return interpretations[score] || 'Unable to determine recommendation.';
 }
 
+function getTeamRecommendation(score) {
+    const teamRecommendations = {
+        'A': 'Architecture team',
+        'B': 'Architecture team',
+        'C': 'Development team',
+        'D': 'Development team'
+    };
+
+    return teamRecommendations[score] || 'Development team';
+}
+
 function displayResults(finalScore, breakdown) {
     console.log('Displaying results:', finalScore, breakdown);
 
@@ -622,18 +633,25 @@ function exportToMarkdown(results) {
 
     const { finalScore, averageScore, totalScore, breakdown, interpretation } = results;
 
-    let markdownContent = `# Assessment Results\n`;
+    let markdownContent = '';
 
-    // Add title and description if provided
+    // 1. If user has entered a title, that should be the top most element as "#" title
     if (assessmentTitle) {
-        markdownContent += `\n## ${assessmentTitle}\n`;
+        markdownContent += `# ${assessmentTitle}\n`;
+        // 2. A level 2 header should then be added as "## Architecture vs Development Decision Assessment"
+        markdownContent += `\n## Architecture vs Development Decision Assessment\n`;
+    } else {
+        // 3. If the user has not provided a title, then use point 2 above as the main title instead
+        markdownContent += `# Architecture vs Development Decision Assessment\n`;
     }
 
     if (assessmentDescription) {
         markdownContent += `\n**Description:** ${assessmentDescription}\n`;
     }
 
-    markdownContent += `\n**Final Recommendation:** ${finalScore}\n`;
+    // 4. The value for the "Final Recommendation" field should change to show team with average in brackets
+    const teamRecommendation = getTeamRecommendation(finalScore);
+    markdownContent += `\n**Final Recommendation:** ${teamRecommendation} (${finalScore})\n`;
     markdownContent += `\n**Score Interpretation:**\n\n${interpretation}\n`;
     markdownContent += `\n**Total Score:** ${totalScore}\n`;
     markdownContent += `\n**Average Score:** ${averageScore.toFixed(2)}\n`;
